@@ -75,6 +75,8 @@ const LipReader = () => {
   const [uploadPrediction, setUploadPrediction] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
   const [previewUrl, setPreviewUrl] = useState("");
+  const [translation, setTranslation] = useState("");
+
 
 
   // Refs
@@ -220,7 +222,7 @@ const LipReader = () => {
       }
     };
   }, [previewUrl]);
-  
+
 
   const processUploadedVideo = async () => {
     if (!uploadedVideo) return;
@@ -246,6 +248,7 @@ const LipReader = () => {
       }
 
       setUploadPrediction(data.prediction);
+      setTranslation(data.translation);
       setError(""); // Clear any previous errors
     } catch (err) {
       setError(`Error processing video: ${err.message}`);
@@ -446,9 +449,21 @@ const LipReader = () => {
           {/* Video Results */}
           <div className="bg-[#12151f] p-6 rounded-lg border border-gray-800">
             <h2 className="text-lg font-semibold mb-2">Video Results:</h2>
-            <p className="text-xl">
-              {uploadPrediction || "Upload and process a video to begin..."}
-            </p>
+            {uploadPrediction ? (
+              <div className="space-y-4">
+                <div className="p-4 bg-[#1a1f2e] border border-gray-700 rounded-md">
+                  <h3 className="font-semibold text-blue-400">English Prediction:</h3>
+                  <p className="mt-1 text-white">{uploadPrediction}</p>
+                </div>
+
+                <div className="p-4 bg-[#1a1f2e] border border-gray-700 rounded-md">
+                  <h3 className="font-semibold text-blue-400">French Translation:</h3>
+                  <p className="mt-1 text-white">{translation}</p>
+                </div>
+              </div>
+            ) : (
+              <p className="text-xl">Upload and process a video to begin...</p>
+            )}
           </div>
         </div>
       </div>
