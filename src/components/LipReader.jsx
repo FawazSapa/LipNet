@@ -74,6 +74,8 @@ const LipReader = () => {
   const [uploadedVideo, setUploadedVideo] = useState(null);
   const [uploadPrediction, setUploadPrediction] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState("");
+
 
   // Refs
   const videoRef = useRef(null);
@@ -129,22 +131,22 @@ const LipReader = () => {
 
   const captureAndSendFrame = async () => {
     if (!videoRef.current || !videoRef.current.srcObject) return;
-  
+
     const canvas = document.createElement("canvas");
     canvas.width = videoRef.current.videoWidth;
     canvas.height = videoRef.current.videoHeight;
     const ctx = canvas.getContext("2d");
-  
+
     if (!ctx) return;
-  
+
     const sendFrame = async () => {
       if (!isRecording || !videoRef.current || !videoRef.current.srcObject) {
         return;
       }
-  
+
       ctx.drawImage(videoRef.current, 0, 0);
       const frame = canvas.toDataURL("image/jpeg");
-  
+
       try {
         const response = await fetch("http://localhost:5000/api/generate", {
           method: "POST",
@@ -153,17 +155,17 @@ const LipReader = () => {
           },
           body: JSON.stringify({ frame }),
         });
-  
+
         const data = await response.json();
         setPrediction(data.prediction);
-  
+
         // Update the displayed frame with the processed image
         if (data.processed_frame) {
           const processedImage = new Image();
           processedImage.src = data.processed_frame;
           ctx.drawImage(processedImage, 0, 0);
         }
-  
+
         if (isRecording) {
           animationFrameId.current = requestAnimationFrame(sendFrame);
         }
@@ -172,10 +174,10 @@ const LipReader = () => {
         setIsRecording(false);
       }
     };
-  
+
     sendFrame();
   };
-    
+
   const toggleRecording = async () => {
     const newIsRecording = !isRecording;
     setIsRecording(newIsRecording);
@@ -196,30 +198,53 @@ const LipReader = () => {
   const handleVideoUpload = (event) => {
     const file = event.target.files[0];
     if (file) {
+      // Revoke the previous URL if it exists
+      if (previewUrl) {
+        URL.revokeObjectURL(previewUrl);
+      }
+
+      // Generate a new preview URL
+      const url = URL.createObjectURL(file);
+      setPreviewUrl(url);
+
       setUploadedVideo(file);
       setUploadPrediction("");
       setError("");
+      console.log("Uploaded file:", file); // Debug: Log the uploaded file
     }
   };
+  useEffect(() => {
+    return () => {
+      if (previewUrl) {
+        URL.revokeObjectURL(previewUrl);
+      }
+    };
+  }, [previewUrl]);
+  
 
   const processUploadedVideo = async () => {
     if (!uploadedVideo) return;
-  
+
     setIsProcessing(true);
     const formData = new FormData();
     formData.append("video", uploadedVideo);
-  
+
     try {
-      const response = await fetch("http://localhost:5000/api/generate", {
+      const response = await fetch("http://localhost:5000/api/process_video", {
         method: "POST",
         body: formData,
       });
-  
+
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-  
+
       const data = await response.json();
+      console.log("API Response:", data);
+      if (data.error) {
+        throw new Error(data.error);
+      }
+
       setUploadPrediction(data.prediction);
       setError(""); // Clear any previous errors
     } catch (err) {
@@ -228,7 +253,6 @@ const LipReader = () => {
       setIsProcessing(false);
     }
   };
-  
   const IntroScreen = () => (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -304,11 +328,10 @@ const LipReader = () => {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={toggleRecording}
-              className={`absolute bottom-4 right-4 px-6 py-3 rounded-full flex items-center gap-2 ${
-                isRecording
-                  ? "bg-red-500 hover:bg-red-600"
-                  : "bg-blue-500 hover:bg-blue-600"
-              }`}
+              className={`absolute bottom-4 right-4 px-6 py-3 rounded-full flex items-center gap-2 ${isRecording
+                ? "bg-red-500 hover:bg-red-600"
+                : "bg-blue-500 hover:bg-blue-600"
+                }`}
             >
               {isRecording ? (
                 <>
@@ -349,10 +372,22 @@ const LipReader = () => {
                 ref={uploadedVideoRef}
                 controls
                 className="w-full h-full rounded-lg bg-black"
-                src={URL.createObjectURL(uploadedVideo)}
+                src={previewUrl}
+                onLoadedData={() => {
+                  console.log("Video preview loaded successfully");
+                }}
+                onError={(e) => {
+                  console.error("Error loading video preview:", e);
+                }}
               />
               <button
-                onClick={() => setUploadedVideo(null)}
+                onClick={() => {
+                  if (previewUrl) {
+                    URL.revokeObjectURL(previewUrl);
+                    setPreviewUrl("");
+                  }
+                  setUploadedVideo(null);
+                }}
                 className="absolute top-2 right-2 p-2 bg-red-500 rounded-full hover:bg-red-600"
               >
                 <X className="w-4 h-4" />
@@ -383,7 +418,6 @@ const LipReader = () => {
               </div>
             </div>
           )}
-
           {/* Video Upload Controls */}
           {uploadedVideo && (
             <div className="flex justify-center mb-6">
