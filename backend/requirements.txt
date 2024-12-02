@@ -1,0 +1,5 @@
+Flask==2.3.2
+requests==2.31.0
+Flask-CORS==3.0.10
+Werkzeug==2.3.7
+python-magic==0.4.27

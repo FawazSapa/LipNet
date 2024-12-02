@@ -22,3 +22,29 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+# Python cache files
+__pycache__/
+*.pyc
+*.pyo
+
+# Virtual environment
+env/
+venv/
+
+# Environment variables
+*.env
+
+# Logs
+*.log
+logs/
+
+# IDE settings
+.vscode/
+.idea/
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# Other
+*.swp
