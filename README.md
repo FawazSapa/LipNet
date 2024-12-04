@@ -36,7 +36,7 @@ pip install -r requirements.txt
 
 4. Run the backend server:
 
-python main.py
+python api.py
 
 
 
