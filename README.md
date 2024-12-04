@@ -44,9 +44,17 @@ python api.py
 
 Files:
 Backend:Contains transaltion(Ollama), Pre-processing,best_model
-translation.ipynb: A seq-seq model which was discarded later as it didnt work as expected.
+
+
+translation.ipynb: A seq-seq model which was discarded later as it didnt work as expected
+
+
 HaarCascade.py: Live lip detection
+
+
 Lipnet.ipynb: Neural Network training,testing,validation,& saving best model
+
+
 Rest of the files:Frontend
 
 ## Notes
