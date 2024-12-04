@@ -1,13 +1,4 @@
 # LipNet
-
-## Overview
-
-**LipNet** is a React application that utilizes advanced lip-reading algorithms. It includes features like:
-- Live camera-based lip-reading
-- Video upload processing
-- Real-time predictions
-- Visual effects powered by Framer Motion
-
 ---
 
 ## Running the Project
