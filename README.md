@@ -22,9 +22,12 @@ Follow the official instructions from Ollama's [GitHub repository](https://githu
 
 2. Create a custom model for translation:
 
-   cd backend ollama create frenchtutor -f Modelfile
+   cd backend
 
-3. Install Python dependencies:
+
+    ollama create frenchtutor -f Modelfile
+
+4. Install Python dependencies:
 pip install -r requirements.txt
 
 
